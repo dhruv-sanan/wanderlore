@@ -10,15 +10,22 @@ const MODEL_ID = "gemini-2.5-flash";
 /** Output token ceiling for one generation call. */
 const MAX_OUTPUT_TOKENS = 8192;
 
-/** Module-cached SDK client, reused across requests instead of re-created per call. */
-let cachedClient: GoogleGenAI | null = null;
+/** User-facing message for a 429 — the call is never retried in this case. */
+const RATE_LIMITED_MESSAGE =
+  "The model is rate limited right now — please resubmit in a moment.";
 
-/** Returns the shared GoogleGenAI client, constructing it lazily on first use. */
+/** Module-cached SDK client, reused across requests instead of re-created per call. */
+let cachedClient: { apiKey: string; client: GoogleGenAI } | null = null;
+
+/**
+ * Returns the shared GoogleGenAI client, constructing it lazily on first use
+ * and rebuilding it only if the configured API key has changed.
+ */
 function getClient(apiKey: string): GoogleGenAI {
-  if (cachedClient === null) {
-    cachedClient = new GoogleGenAI({ apiKey });
+  if (cachedClient === null || cachedClient.apiKey !== apiKey) {
+    cachedClient = { apiKey, client: new GoogleGenAI({ apiKey }) };
   }
-  return cachedClient;
+  return cachedClient.client;
 }
 
 /**
@@ -78,7 +85,7 @@ export async function callTravelModel(
     }
 
     if (errorClass === "rate_limited") {
-      throw new Error("The model is rate limited right now — please resubmit in a moment.");
+      throw new Error(RATE_LIMITED_MESSAGE);
     }
 
     if (errorClass === "transient") {
@@ -91,7 +98,7 @@ export async function callTravelModel(
           throw retryErr;
         }
         if (retryClass === "rate_limited") {
-          throw new Error("The model is rate limited right now — please resubmit in a moment.");
+          throw new Error(RATE_LIMITED_MESSAGE);
         }
         throw new Error("The travel model is temporarily unavailable. Please try again.");
       }

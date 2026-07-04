@@ -17,6 +17,50 @@ function labelFor(interest: Interest): string {
   return interest.charAt(0).toUpperCase() + interest.slice(1);
 }
 
+/** Props for {@link InterestChecklist}. */
+interface InterestChecklistProps {
+  /** Interests currently selected by the traveler. */
+  selected: Interest[];
+  /** Toggles one interest in or out of the selection. */
+  onToggle: (interest: Interest) => void;
+  /** Id of the fieldset legend, used to derive stable per-checkbox input ids. */
+  legendId: string;
+}
+
+/** Renders the interest checkboxes for every {@link INTEREST_OPTIONS} entry. */
+function InterestChecklistComponent({
+  selected,
+  onToggle,
+  legendId,
+}: InterestChecklistProps): ReactElement {
+  return (
+    <div className="flex flex-wrap gap-3">
+      {INTEREST_OPTIONS.map((interest) => {
+        const inputId = `${legendId}-${interest}`;
+        return (
+          <label
+            key={interest}
+            htmlFor={inputId}
+            className="flex min-h-11 items-center gap-2 rounded-md border border-stone-300 bg-stone-50 px-3 py-2 text-sm text-stone-800"
+          >
+            <input
+              id={inputId}
+              type="checkbox"
+              checked={selected.includes(interest)}
+              onChange={() => onToggle(interest)}
+              className="h-5 w-5 accent-amber-800"
+            />
+            {labelFor(interest)}
+          </label>
+        );
+      })}
+    </div>
+  );
+}
+
+/** Memoized checklist — typing in the destination field never re-renders it. */
+const InterestChecklist = memo(InterestChecklistComponent);
+
 /**
  * The trip request control panel: destination, trip length (1-7 days), and
  * optional interest checkboxes. Performs client-side pre-validation that
@@ -106,27 +150,7 @@ function DiscoveryFormComponent({ onSubmit, isRunning }: DiscoveryFormProps): Re
         <legend id={legendId} className="text-sm font-semibold text-stone-800">
           Interests (optional)
         </legend>
-        <div className="flex flex-wrap gap-3">
-          {INTEREST_OPTIONS.map((interest) => {
-            const inputId = `${legendId}-${interest}`;
-            return (
-              <label
-                key={interest}
-                htmlFor={inputId}
-                className="flex min-h-11 items-center gap-2 rounded-md border border-stone-300 bg-stone-50 px-3 py-2 text-sm text-stone-800"
-              >
-                <input
-                  id={inputId}
-                  type="checkbox"
-                  checked={interests.includes(interest)}
-                  onChange={() => toggleInterest(interest)}
-                  className="h-5 w-5 accent-amber-800"
-                />
-                {labelFor(interest)}
-              </label>
-            );
-          })}
-        </div>
+        <InterestChecklist selected={interests} onToggle={toggleInterest} legendId={legendId} />
       </fieldset>
 
       <button

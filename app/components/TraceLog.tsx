@@ -109,8 +109,8 @@ function TraceLogComponent({ logs }: TraceLogProps): ReactElement {
               Waiting for the first trace event…
             </li>
           )}
-          {logs.map((log, index) => (
-            <TraceLogRow key={`${log.stage}-${log.timestamp}-${index}`} log={log} />
+          {logs.map((log) => (
+            <TraceLogRow key={`${log.stage}-${log.timestamp}`} log={log} />
           ))}
         </ol>
       </div>

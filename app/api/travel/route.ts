@@ -64,6 +64,10 @@ export async function POST(request: Request): Promise<Response> {
   });
 
   return new Response(stream, {
-    headers: { "Content-Type": "application/x-ndjson" },
+    headers: {
+      "Content-Type": "application/x-ndjson",
+      // Trace streams are per-request live output — never cacheable.
+      "Cache-Control": "no-store",
+    },
   });
 }
