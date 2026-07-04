@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import type { ReactElement } from "react";
 import type { DiscoveryRequest, TraceEvent, TraceStage, TravelResult } from "@/lib/types";
 import { DiscoveryForm } from "./components/DiscoveryForm";
 import { TraceLog } from "./components/TraceLog";
@@ -106,8 +107,9 @@ async function runDiscoveryStream(
 
   const reader = response.body.getReader();
   const decoder = new TextDecoder();
+  let streamDone = false;
 
-  for (;;) {
+  while (!streamDone) {
     const { done, value } = await reader.read();
     if (value) {
       buffer += decoder.decode(value, { stream: true });
@@ -127,14 +129,14 @@ async function runDiscoveryStream(
       if (batch.length > 0) {
         onChunk(batch);
       }
-      break;
+      streamDone = true;
     }
   }
 
   return { sawTerminalEvent, reachable: true };
 }
 
-export default function Home() {
+export default function Home(): ReactElement {
   const [logs, setLogs] = useState<TraceEvent[]>([]);
   const [result, setResult] = useState<TravelResult | null>(null);
   const [error, setError] = useState<string | null>(null);

@@ -1,6 +1,7 @@
 "use client";
 
 import { memo, useEffect, useRef } from "react";
+import type { ReactElement } from "react";
 import type { TraceEvent, TraceStage } from "@/lib/types";
 
 /** Props for {@link TraceLog}. */
@@ -44,13 +45,43 @@ function formatTimestamp(timestamp: number): string {
   return `${hh}:${mm}:${ss}.${mmm}`;
 }
 
+/** Props for {@link TraceLogRow}. */
+interface TraceLogRowProps {
+  /** The trace event this row renders. */
+  log: TraceEvent;
+}
+
+/** Renders one trace event: stage marker, label, timestamp, and message. */
+function TraceLogRowComponent({ log }: TraceLogRowProps): ReactElement {
+  return (
+    <li className="rounded-md border border-stone-700 bg-stone-800 px-3 py-2 text-sm">
+      <div className="flex items-baseline gap-2">
+        <span aria-hidden="true" className="font-mono text-amber-400">
+          {markerFor(log.stage)}
+        </span>
+        <span className="font-semibold text-stone-50">{stageLabel(log.stage)}</span>
+        <time
+          dateTime={new Date(log.timestamp).toISOString()}
+          className="ml-auto font-mono text-xs text-stone-400"
+        >
+          {formatTimestamp(log.timestamp)}
+        </time>
+      </div>
+      <p className="mt-1 text-stone-200">{log.message}</p>
+    </li>
+  );
+}
+
+/** Memoized log row — appending a new event never re-renders earlier rows. */
+const TraceLogRow = memo(TraceLogRowComponent);
+
 /**
  * The "Glassbox" — a live, append-only log of every {@link TraceEvent} the
  * backend actually emitted for the current run. Renders only real events;
  * it never fabricates stages, timing, or progress. Auto-scrolls to the
  * newest entry as events arrive.
  */
-function TraceLogComponent({ logs }: TraceLogProps) {
+function TraceLogComponent({ logs }: TraceLogProps): ReactElement {
   const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -79,24 +110,7 @@ function TraceLogComponent({ logs }: TraceLogProps) {
             </li>
           )}
           {logs.map((log, index) => (
-            <li
-              key={`${log.stage}-${log.timestamp}-${index}`}
-              className="rounded-md border border-stone-700 bg-stone-800 px-3 py-2 text-sm"
-            >
-              <div className="flex items-baseline gap-2">
-                <span aria-hidden="true" className="font-mono text-amber-400">
-                  {markerFor(log.stage)}
-                </span>
-                <span className="font-semibold text-stone-50">{stageLabel(log.stage)}</span>
-                <time
-                  dateTime={new Date(log.timestamp).toISOString()}
-                  className="ml-auto font-mono text-xs text-stone-400"
-                >
-                  {formatTimestamp(log.timestamp)}
-                </time>
-              </div>
-              <p className="mt-1 text-stone-200">{log.message}</p>
-            </li>
+            <TraceLogRow key={`${log.stage}-${log.timestamp}-${index}`} log={log} />
           ))}
         </ol>
       </div>

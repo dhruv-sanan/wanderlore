@@ -1,7 +1,7 @@
 "use client";
 
 import { memo, useCallback, useId, useState } from "react";
-import type { FormEvent } from "react";
+import type { FormEvent, ReactElement } from "react";
 import { INTEREST_OPTIONS, type DiscoveryRequest, type Interest } from "@/lib/types";
 
 /** Props for {@link DiscoveryForm}. */
@@ -24,7 +24,7 @@ function labelFor(interest: Interest): string {
  * authority — the backend still validates. Field values are never cleared on
  * failure, so recovering from a transient error is a single click on Submit.
  */
-function DiscoveryFormComponent({ onSubmit, isRunning }: DiscoveryFormProps) {
+function DiscoveryFormComponent({ onSubmit, isRunning }: DiscoveryFormProps): ReactElement {
   const [destination, setDestination] = useState("");
   const [tripDays, setTripDays] = useState(3);
   const [interests, setInterests] = useState<Interest[]>([]);

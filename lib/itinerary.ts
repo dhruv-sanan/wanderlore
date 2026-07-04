@@ -71,37 +71,42 @@ export function normalizeArea(raw: string): string {
  * obvious day-to-day zigzag risk; it is grouping only, not routing.
  */
 export function clusterByArea(attractions: Attraction[]): Attraction[] {
-  const groups = new Map<string, Attraction[]>();
+  // Normalize each area exactly once up front — O(n) total normalization
+  // work instead of recomputing the regex pipeline on every pass.
+  const keyed = attractions.map((attraction) => ({
+    attraction,
+    key: normalizeArea(attraction.area),
+  }));
 
-  attractions.forEach((attraction) => {
-    const key = normalizeArea(attraction.area);
+  const groups = new Map<string, Attraction[]>();
+  for (const { attraction, key } of keyed) {
     if (key === "") {
-      return;
+      continue;
     }
-    if (!groups.has(key)) {
-      groups.set(key, []);
+    const group = groups.get(key);
+    if (group) {
+      group.push(attraction);
+    } else {
+      groups.set(key, [attraction]);
     }
-    groups.get(key)?.push(attraction);
-  });
+  }
 
   const result: Attraction[] = [];
   const consumed = new Set<string>();
-
-  attractions.forEach((attraction) => {
-    const key = normalizeArea(attraction.area);
+  for (const { attraction, key } of keyed) {
     if (key === "") {
       result.push(attraction);
-      return;
+      continue;
     }
     if (consumed.has(key)) {
-      return;
+      continue;
     }
     consumed.add(key);
     const group = groups.get(key);
     if (group) {
       result.push(...group);
     }
-  });
+  }
 
   return result;
 }

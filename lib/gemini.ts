@@ -10,6 +10,17 @@ const MODEL_ID = "gemini-2.5-flash";
 /** Output token ceiling for one generation call. */
 const MAX_OUTPUT_TOKENS = 8192;
 
+/** Module-cached SDK client, reused across requests instead of re-created per call. */
+let cachedClient: GoogleGenAI | null = null;
+
+/** Returns the shared GoogleGenAI client, constructing it lazily on first use. */
+function getClient(apiKey: string): GoogleGenAI {
+  if (cachedClient === null) {
+    cachedClient = new GoogleGenAI({ apiKey });
+  }
+  return cachedClient;
+}
+
 /**
  * Calls Gemini once to generate a travel-discovery payload for the given
  * prompt parts, returning the raw response text. `process.env.GEMINI_API_KEY`
@@ -34,7 +45,7 @@ export async function callTravelModel(
     throw new Error("Gemini is not configured: GEMINI_API_KEY is missing.");
   }
 
-  const client = new GoogleGenAI({ apiKey });
+  const client = getClient(apiKey);
 
   const attempt = async (): Promise<string> => {
     const response = await client.models.generateContent({

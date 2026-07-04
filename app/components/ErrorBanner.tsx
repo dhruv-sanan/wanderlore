@@ -1,4 +1,5 @@
 import { memo } from "react";
+import type { ReactElement } from "react";
 
 /** Props for {@link ErrorBanner}. */
 export interface ErrorBannerProps {
@@ -12,7 +13,7 @@ export interface ErrorBannerProps {
  * user-readable, e.g. rate-limit guidance) — never a stack trace — plus a
  * short "try again" hint.
  */
-function ErrorBannerComponent({ message }: ErrorBannerProps) {
+function ErrorBannerComponent({ message }: ErrorBannerProps): ReactElement {
   return (
     <div
       role="alert"

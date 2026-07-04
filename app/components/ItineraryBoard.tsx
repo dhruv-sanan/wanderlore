@@ -1,4 +1,5 @@
 import { memo } from "react";
+import type { ReactElement } from "react";
 import type { Attraction, ItineraryResult } from "@/lib/types";
 
 /** Props for {@link ItineraryBoard}. */
@@ -17,7 +18,7 @@ interface AttractionItemProps {
 }
 
 /** Renders one attraction's name, hours, category, neighborhood tag, and rationale. */
-function AttractionItemComponent({ attraction }: AttractionItemProps) {
+function AttractionItemComponent({ attraction }: AttractionItemProps): ReactElement {
   return (
     <li className="rounded-md border border-stone-300 bg-white p-3">
       <div className="flex flex-wrap items-baseline justify-between gap-2">
@@ -48,7 +49,7 @@ const AttractionItem = memo(AttractionItemComponent);
  * attractions that did not fit. All packing is deterministic output from
  * the backend; this component only renders it.
  */
-function ItineraryBoardComponent({ itinerary }: ItineraryBoardProps) {
+function ItineraryBoardComponent({ itinerary }: ItineraryBoardProps): ReactElement {
   return (
     <section
       aria-labelledby="itinerary-heading"
