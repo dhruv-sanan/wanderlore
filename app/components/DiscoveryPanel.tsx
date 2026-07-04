@@ -1,4 +1,4 @@
-import { memo } from "react";
+import { memo, useMemo } from "react";
 import type { GeminiTravelPayload } from "@/lib/types";
 
 /** Props for {@link DiscoveryPanel}. */
@@ -24,6 +24,11 @@ function paragraphsOf(narrative: string): string[] {
  * model.
  */
 function DiscoveryPanelComponent({ payload }: DiscoveryPanelProps) {
+  const storyParagraphs = useMemo(
+    () => paragraphsOf(payload.story.narrative),
+    [payload.story.narrative]
+  );
+
   return (
     <div className="flex flex-col gap-6">
       {payload.hiddenGems.length > 0 && (
@@ -74,8 +79,8 @@ function DiscoveryPanelComponent({ payload }: DiscoveryPanelProps) {
           {payload.story.title}
         </h2>
         <div className="flex flex-col gap-3 rounded-md border border-amber-200 bg-white p-4 font-serif text-base leading-relaxed text-stone-800">
-          {paragraphsOf(payload.story.narrative).map((paragraph, index) => (
-            <p key={index}>{paragraph}</p>
+          {storyParagraphs.map((paragraph, index) => (
+            <p key={`${index}-${paragraph}`}>{paragraph}</p>
           ))}
         </div>
       </section>

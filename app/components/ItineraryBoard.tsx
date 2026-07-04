@@ -10,8 +10,14 @@ export interface ItineraryBoardProps {
 /** Daily hour cap used purely for the on-screen "X h / 8h cap" label. */
 const DAY_HOUR_CAP = 8;
 
+/** Props for {@link AttractionItem}. */
+interface AttractionItemProps {
+  /** The attraction to render. */
+  attraction: Attraction;
+}
+
 /** Renders one attraction's name, hours, category, neighborhood tag, and rationale. */
-function AttractionItem({ attraction }: { attraction: Attraction }) {
+function AttractionItemComponent({ attraction }: AttractionItemProps) {
   return (
     <li className="rounded-md border border-stone-300 bg-white p-3">
       <div className="flex flex-wrap items-baseline justify-between gap-2">
@@ -30,6 +36,11 @@ function AttractionItem({ attraction }: { attraction: Attraction }) {
     </li>
   );
 }
+
+/**
+ * Memoized attraction item. See {@link AttractionItemComponent} for behavior.
+ */
+const AttractionItem = memo(AttractionItemComponent);
 
 /**
  * The packed trip board: one `<section>` per itinerary day with its

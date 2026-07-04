@@ -29,7 +29,11 @@ export async function POST(request: Request): Promise<Response> {
   const stream = new ReadableStream<Uint8Array>({
     async start(streamController) {
       const emit = (event: TraceEvent): void => {
-        streamController.enqueue(encodeEvent(event));
+        try {
+          streamController.enqueue(encodeEvent(event));
+        } catch {
+          // Stream already closed — nothing to do.
+        }
       };
 
       emit({
