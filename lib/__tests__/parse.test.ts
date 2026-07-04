@@ -58,7 +58,7 @@ describe("parseGeminiPayload", () => {
 
   it("returns null when story is missing", () => {
     const payload = validPayload();
-    const { story, ...rest } = payload;
+    const { story: _story, ...rest } = payload;
     expect(parseGeminiPayload(JSON.stringify(rest))).toBeNull();
   });
 

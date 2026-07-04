@@ -115,10 +115,15 @@ function clampHours(hours: number): number {
 }
 
 /**
- * Greedily packs an ordered list of attractions into `tripDays` days,
- * capping each day at `HOURS_PER_DAY` hours. Attractions that do not fit
- * within the available day/hour capacity are returned as `overflow`, in the
- * order they were dropped.
+ * Packs an ordered list of attractions into `tripDays` days, capping each
+ * day at `HOURS_PER_DAY` hours. Fill is sequential and forward-only — once a
+ * day is advanced past, it is never revisited, which keeps area-clustered
+ * runs together on one day when they fit. To avoid densely cramming early
+ * days full while later days sit empty, each day also targets an even share
+ * of the attraction count (`ceil(total / tripDays)`); a day advances once it
+ * hits either that count target or the hour cap, whichever comes first.
+ * Attractions that still do not fit once `tripDays` is exhausted are
+ * returned as `overflow`, in the order they were dropped.
  */
 function packDays(
   ordered: Attraction[],
@@ -130,16 +135,24 @@ function packDays(
     totalHours: 0,
   }));
   const overflow: Attraction[] = [];
+  const perDayTarget = tripDays > 0 ? Math.ceil(ordered.length / tripDays) : 0;
+  let current = 0;
 
   for (const attraction of ordered) {
     const hours = clampHours(attraction.estimatedHours);
-    const targetDay = days.find((day) => day.totalHours + hours <= HOURS_PER_DAY);
-    if (targetDay) {
-      targetDay.attractions.push(attraction);
-      targetDay.totalHours += hours;
-    } else {
-      overflow.push(attraction);
+    while (
+      current < tripDays &&
+      (days[current].attractions.length >= perDayTarget ||
+        days[current].totalHours + hours > HOURS_PER_DAY)
+    ) {
+      current += 1;
     }
+    if (current >= tripDays) {
+      overflow.push(attraction);
+      continue;
+    }
+    days[current].attractions.push(attraction);
+    days[current].totalHours += hours;
   }
 
   return { days, overflow };

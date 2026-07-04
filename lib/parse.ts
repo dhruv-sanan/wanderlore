@@ -3,6 +3,15 @@ import { INTEREST_OPTIONS, type Attraction, type CulturalEvent, type GeminiTrave
 /** Category values Gemini is permitted to return for an attraction. */
 const ALLOWED_CATEGORIES: readonly string[] = [...INTEREST_OPTIONS, "general"];
 
+/** Maximum attractions accepted, mirroring the response schema's cap — defends against provider schema slippage. */
+const MAX_ATTRACTIONS = 14;
+
+/** Maximum hidden gems accepted, mirroring the response schema's cap. */
+const MAX_HIDDEN_GEMS = 4;
+
+/** Maximum cultural events accepted, mirroring the response schema's cap. */
+const MAX_EVENTS = 4;
+
 /**
  * Narrows an unknown value to a non-null, non-array object for property
  * access without resorting to `any`.
@@ -86,13 +95,13 @@ export function parseGeminiPayload(text: string): GeminiTravelPayload | null {
 
   const { attractions, hiddenGems, events, story } = candidate;
 
-  if (!isArrayOf(attractions, isAttraction)) {
+  if (!isArrayOf(attractions, isAttraction) || attractions.length > MAX_ATTRACTIONS) {
     return null;
   }
-  if (!isArrayOf(hiddenGems, isHiddenGem)) {
+  if (!isArrayOf(hiddenGems, isHiddenGem) || hiddenGems.length > MAX_HIDDEN_GEMS) {
     return null;
   }
-  if (!isArrayOf(events, isCulturalEvent)) {
+  if (!isArrayOf(events, isCulturalEvent) || events.length > MAX_EVENTS) {
     return null;
   }
   if (!isHeritageStory(story)) {

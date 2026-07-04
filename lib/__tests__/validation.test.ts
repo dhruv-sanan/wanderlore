@@ -63,7 +63,7 @@ describe("validateDiscoveryRequest", () => {
   });
 
   it("rejects a request missing destination", () => {
-    const { destination, ...rest } = baseValid;
+    const { destination: _destination, ...rest } = baseValid;
     expect(validateDiscoveryRequest(rest)).toBeNull();
   });
 
