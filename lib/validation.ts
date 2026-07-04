@@ -79,10 +79,11 @@ export function validateDiscoveryRequest(body: unknown): DiscoveryRequest | null
   if (typeof rawDestination !== "string") {
     return null;
   }
-  if (rawDestination.length > MAX_RAW_DESTINATION_LENGTH) {
-    return null;
-  }
-  const destination = sanitizeText(rawDestination);
+  // Charset compliance is checked against the trimmed-but-unstripped input:
+  // disallowed characters (control chars, `<`/`>`, shell/SQL metacharacters)
+  // must reject the request outright rather than being silently stripped by
+  // sanitizeText and letting the remainder slip through as "valid".
+  const destination = rawDestination.trim();
   if (
     destination.length < MIN_DESTINATION_LENGTH ||
     destination.length > MAX_DESTINATION_LENGTH ||

@@ -50,6 +50,7 @@ export function buildTravelPrompt(req: DiscoveryRequest): {
   const userContent = [
     `Destination: <<<${req.destination}>>>`,
     `Trip length: ${req.tripDays} day(s).`,
+    `Attraction target: ${targetCount}.`,
     `Interests: ${req.interests.length > 0 ? req.interests.join(", ") : "none"}.`,
   ].join("\n");
 
